@@ -32,6 +32,7 @@ public class FilteringApples {
 
         filter(inventory, new AppleRedAndHeavyPredicate());
 
+        /* 次数相当于 predicate 中 test的方法的实现  apple -> "red".equals(apple.getColor()*/
         filter(inventory, apple -> "red".equals(apple.getColor()));
 
     }

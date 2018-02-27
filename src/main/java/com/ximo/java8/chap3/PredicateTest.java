@@ -2,7 +2,9 @@ package com.ximo.java8.chap3;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.IntPredicate;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -43,8 +45,21 @@ public class PredicateTest {
         List<String> filterString2 = list.stream().filter(s -> s != null && s.length() > 0).collect(Collectors.toList());
         filterString2.forEach(System.out::print);
 
+        testIntPredicate();
     }
 
+    /**
+     * 使用IntPredicate
+     */
+    public static void testIntPredicate() {
+        IntPredicate evenNumbers = i -> i % 2 == 0;
+        boolean testResult = evenNumbers.test(1000);
+        System.out.println(testResult);
+
+        Predicate<Integer> oddNumbers = i -> i % 2 == 1;
+        boolean testResult2 = oddNumbers.test(1001);
+        System.out.println(testResult2);
+    }
 
 
 
