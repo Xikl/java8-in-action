@@ -4,10 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * @author 朱文赵
@@ -19,7 +19,7 @@ public class Sorting {
     public static void main(String[] args) {
         List<Apple> apples = new ArrayList<>(Arrays.asList(new Apple(80, "green"),
                 new Apple(155, "red"), new Apple(120, "red")));
-        apples.sort(new AppleCompartor());
+        apples.sort(new AppleComparator());
         System.out.println(apples);
 
         //改变ArrayList第二个的值
@@ -47,9 +47,16 @@ public class Sorting {
     private static class Apple {
         private Integer weight;
         private String color;
+
+        Apple(Integer weight) {
+            this.weight = weight;
+        }
     }
 
-    static class AppleCompartor implements Comparator<Apple> {
+    /**
+     * 自定义苹果比较类
+     */
+    static class AppleComparator implements Comparator<Apple> {
 
         @Override
         public int compare(Apple o1, Apple o2) {
@@ -59,5 +66,60 @@ public class Sorting {
     }
 
 
+    /**
+     * 采用多种方式生成Apple
+     */
+    public void supplierApple() {
+        /* 调用Apple中的无参构造*/
+        Supplier<Apple> appleSupplier = Apple::new;
+        appleSupplier.get();
+
+        /* 调用 Apple中的关于重量的构造函数 */
+        Function<Integer, Apple> integerAppleFunction = Apple::new;
+        integerAppleFunction.apply(100);
+
+        /*批量添加weight 然后返回具有重量Weight的Apple对象*/
+        map(Arrays.asList(19, 22, 30), Apple::new).forEach(System.out::print);
+        new ArrayList<>(Arrays.asList(19, 22, 30)).stream().map(Apple::new).forEach(System.out::print);
+
+        BiFunction<Integer, String, Apple> biFunction = Apple::new;
+        biFunction.apply(20, "red");
+
+        /*Map -> Apple*/
+        Map<Integer, String> map = new HashMap<>(3);
+        map.put(30, "red");
+        map.put(40, "green");
+        map.put(50, "blue");
+        map(map, Apple::new).forEach(System.out::print);
+    }
+
+    /**
+     *
+     * @param list
+     * @param function
+     * @return
+     */
+    private static List<Apple> map(List<Integer> list, Function<Integer, Apple> function) {
+        List<Apple> result = new ArrayList<>();
+        for (Integer e : list) {
+            result.add(function.apply(e));
+        }
+        return result;
+    }
+
+    /**
+     * map 转化为new Apple对象 然后收集为list
+     *
+     * @param map
+     * @param biFunction
+     * @return
+     */
+    private static List<Apple> map(Map<Integer, String> map, BiFunction<Integer, String, Apple> biFunction) {
+        List<Apple> result = new ArrayList<>();
+        for (Map.Entry<Integer, String> entry : map.entrySet()) {
+            result.add(biFunction.apply(entry.getKey(), entry.getValue()));
+        }
+        return result;
+    }
 
 }
