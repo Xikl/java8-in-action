@@ -36,4 +36,19 @@ public class FunctionTest {
         return result;
     }
 
+    /**
+     * 使用Function中compose 和 andThen
+     */
+    public void composeAndAndThen() {
+        Function<Integer, Integer> f = x -> x + 1;
+        Function<Integer, Integer> g = x -> x * 2;
+
+        /* 先执行F 后执行G  g(f(x))*/
+        Function<Integer, Integer> andThen = f.andThen(g);
+        Integer result = andThen.apply(1);
+
+        /* 先执行G 后执行F f(g(x))*/
+        Function<Integer, Integer> compose = f.compose(g);
+        Integer result2 = compose.apply(1);
+    }
 }
