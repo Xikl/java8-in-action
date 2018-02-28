@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 /**
@@ -38,7 +39,27 @@ public class Sorting {
         apples.sort((o1, o2) -> o1.getWeight().compareTo(o2.getWeight()));
         apples.sort(Comparator.comparing(Apple::getWeight));
 
+        /* 逆序排序*/
+        apples.sort(Comparator.comparing(Apple::getWeight).reversed());
 
+        /* 逆序排序 加 thenComparing*/
+        apples.sort(Comparator.comparing(Apple::getWeight).reversed().thenComparing(Apple::getColor));
+
+
+    }
+
+    /**
+     * 谓词组合
+     */
+    public void youKnowTheMeaning() {
+        /* 谓词组合*/
+        /* 红苹果*/
+        Predicate<Apple> redApple = a -> "red".equals(a.getColor());
+        /* 不是 红苹果*/
+        Predicate<Apple> notRedApple = redApple.negate();
+        Predicate<Apple> redAndHeavyApple = redApple.and(a -> a.getWeight() > 150);
+        Predicate<Apple> redAndHeavyAppleOrGreen = redApple.and(a -> a.getWeight() > 150)
+                .or(a -> "green".equals(a.getColor()));
     }
 
     @Data
