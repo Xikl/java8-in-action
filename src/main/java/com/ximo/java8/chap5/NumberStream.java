@@ -40,11 +40,24 @@ public class NumberStream {
 
     /**
      * 组合只能被3整除的数字
+     * 先顾虑再收集
+     *
      * @return 只能被3整除的数字列表
      */
     private static List<int[]> union3Number() {
         return numbers1.stream()
                 .flatMap(i -> numbers2.stream().filter(j -> (i + j) % 3 == 0).map(j -> new int[]{i, j}))
+                .collect(toList());
+    }
+
+    /**
+     * 可以先收集完成 再 过滤
+     * @return 只能被3整除的数字列表
+     */
+    private static List<int[]> union3Number2() {
+        return numbers1.stream()
+                .flatMap(i -> numbers2.stream().map(j -> new int[]{i, j}))
+                .filter(pair -> (pair[0] + pair[1]) % 3 == 0)
                 .collect(toList());
     }
 
