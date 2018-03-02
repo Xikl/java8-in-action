@@ -1,6 +1,7 @@
 package com.ximo.java8.chap4.domain;
 
 import com.ximo.java8.chap4.enums.Type;
+import com.ximo.java8.chap6.enums.CaloricLevel;
 import lombok.Data;
 
 import java.util.Arrays;
@@ -40,4 +41,13 @@ public class Dish {
                     new Dish("prawns", false, 400, Type.FISH),
                     new Dish("salmon", false, 450, Type.FISH));
 
+    public CaloricLevel getCaloricLevel() {
+        if (this.getCalories() <= 400) {
+            return CaloricLevel.DIET;
+        } else if (this.getCalories() <= 700) {
+            return CaloricLevel.NORMAL;
+        } else {
+            return CaloricLevel.FAT;
+        }
+    }
 }
