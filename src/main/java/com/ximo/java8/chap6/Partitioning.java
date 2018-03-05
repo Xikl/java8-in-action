@@ -22,7 +22,8 @@ public class Partitioning {
 //        //获得是素菜的Dish
 //        partitioningDishes(Dish.MENU).get(true);
 
-        System.out.println(partitionDishesAndGroupBy(Dish.MENU));
+//        System.out.println(partitionDishesAndGroupBy(Dish.MENU));
+//        test(Dish.MENU).forEach((k, v) -> System.out.println(k + ", " + v));
     }
 
     /**
@@ -60,7 +61,7 @@ public class Partitioning {
      * 对Dishes中的进行分区 然后对每个分区中的进行分组
      *
      * @param dishes 菜肴
-     * @return 分组后分区
+     * @return 分区后分组
      */
     private static Map<Boolean, Map<Type, List<Dish>>> partitionDishesAndGroupBy(List<Dish> dishes) {
         return dishes.stream()
@@ -78,6 +79,27 @@ public class Partitioning {
                 .collect(partitioningBy(Dish::isVegetarian,
                         collectingAndThen(maxBy(Comparator.comparingInt(Dish::getCalories)), Optional::get)));
     }
+
+    /**
+     * 回顾partitionedBy的用法
+     * partitioned() 中必须使用谓词 即返回一个boolean的值
+     *
+     * @param dishes 菜肴
+     */
+    private static void partitionedByTest(List<Dish> dishes) {
+        //{ false={false=[chicken, prawns, salmon], true=[pork, beef]},
+        //true={false=[rice, season fruit], true=[french fries, pizza]}}
+        Map<Boolean, Map<Boolean, List<Dish>>> collect1 = dishes.stream()
+                .collect(partitioningBy(Dish::isVegetarian, partitioningBy(d -> d.getCalories() > 500)));
+
+        // {false=5, true=4}
+        Map<Boolean, Long> collect = dishes.stream()
+                .collect(partitioningBy(Dish::isVegetarian, counting()));
+
+    }
+
+
+
 
 
 }

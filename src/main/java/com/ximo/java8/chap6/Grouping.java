@@ -116,7 +116,27 @@ public class Grouping {
                 .collect(groupingBy(Dish::getType, mapping(Dish::getCaloricLevel, toSet())));
     }
 
+    /**
+     * 分组 菜肴 根据类型 然后值为热量等级
+     * @param dishes 菜肴
+     * @return 分组后的菜肴
+     */
     private static Map<Type, Set<CaloricLevel>> groupDishByTypeBoxedHashSet(List<Dish> dishes) {
         return dishes.stream()
                 .collect(groupingBy(Dish::getType, mapping(Dish::getCaloricLevel, toCollection(HashSet::new))));
-    }}
+    }
+
+    /**
+     * 根据是不是素食 进行分组
+     *
+     * @param dishes 菜肴
+     * @return 分组后的菜肴
+     */
+    private static Map<Boolean, ArrayList<Dish>> test(List<Dish> dishes) {
+        return dishes.stream()
+                .collect(groupingBy(Dish::isVegetarian, mapping(Function.identity(), toCollection(ArrayList::new))));
+    }
+
+
+}
+
