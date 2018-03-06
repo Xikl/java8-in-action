@@ -15,7 +15,7 @@ public class Regexp {
     private static void test() {
         // 定义字符串
         String info = "LXH:98|MLDN:90|LI:100";
-        String s[] = info.split("\\|");
+        String[] s = info.split("\\|");
         Arrays.stream(s).forEach(System.out::println);
     }
 
