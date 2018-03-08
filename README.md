@@ -25,3 +25,13 @@ Long rightResult = rightTask.compute();
 Long leftResult = leftTask.join();
 return leftResult + rightResult;
 ```
+- 一种错误的方式
+    + 这样会操成有线程变成了监工，不工作，分的越多，情况
+    越明显
+```
+leftTask.fork();
+rightTask.fork();
+
+Long leftResult = leftTask.join();
+Long rightResult = rightTask.join();
+```
