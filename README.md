@@ -35,3 +35,30 @@ rightTask.fork();
 Long leftResult = leftTask.join();
 Long rightResult = rightTask.join();
 ```
+
+#### Supplier 供应商 生产者
+```java
+@FunctionalInterface
+public interface Supplier<T> {
+
+    /**
+     * Gets a result.
+     *
+     * @return a result
+     */
+    T get();
+}
+```
+- 例子
+```
+public void log(Level level, Suppiler<String> msgSupplier){
+    if(logger.isLoggable(level){
+        log(level, msgSupplier.get());
+    }
+}
+```
+- 思考
+    + 用这种方式的时候，一帮都是在需要胖丁第一个参数的
+    状态，然后才操作第二个参数。
+    + 所以一般遇到这种情况的时候，可以新建一个方法来避免这种
+    显示的判断.
