@@ -62,3 +62,35 @@ public void log(Level level, Suppiler<String> msgSupplier){
     状态，然后才操作第二个参数。
     + 所以一般遇到这种情况的时候，可以新建一个方法来避免这种
     显示的判断.
+#### java8 与 策略模式
+- 避免了 样板代码（很好）
+```java
+
+public interface ValidationStrategy {
+    boolean execute(String s);
+}
+
+public class Validator{
+    private final ValidationStrategy strategy;
+    
+    public Validator(ValidationStrategy v){
+        this.strategy = v;
+    }
+    public boolean validate(String s){
+        return strategy.execute(s);
+    }
+}
+
+public class Main{
+    public static void main(String[] args){
+      //java8
+      Validator numericValidator =
+          new Validator((String s) -> s.matches("[a-z]+"));
+      boolean b1 = numericValidator.validate("aaaa");
+      Validator lowerCaseValidator =
+          new Validator((String s) -> s.matches("\\d+"));
+      boolean b2 = lowerCaseValidator.validate("bbbb");
+    }
+}
+
+```
