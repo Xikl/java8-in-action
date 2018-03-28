@@ -92,5 +92,15 @@ public class Main{
       boolean b2 = lowerCaseValidator.validate("bbbb");
     }
 }
-
 ```
+#### java8中Consumer接口思考 模板方法
+```
+public void processCustomer(int id, Consumer<Customer> makeCustomerHappy){
+    Customer c = Database.getCustomerWithId(id);
+    makeCustomerHappy.accept(c);
+}
+
+new OnlineBankingLambda().processCustomer(1337, (Customer c) ->
+    System.out.println("Hello " + c.getName());
+```
+> 这样不用继承一个接口 然后 写他的实现类。java8可以直接通过lambda进行操作
