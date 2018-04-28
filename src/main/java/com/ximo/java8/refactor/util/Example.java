@@ -2,6 +2,8 @@ package com.ximo.java8.refactor.util;
 
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * @author 朱文赵
@@ -19,15 +21,5 @@ public class Example {
     private boolean share;
 
     private Integer age;
-
-    public Example(String name, Integer code) {
-        this.name = name;
-        this.code = code;
-    }
-
-    public Example(boolean share, Integer age) {
-        this.share = share;
-        this.age = age;
-    }
 
 }
