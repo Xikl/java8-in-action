@@ -21,6 +21,7 @@ public class ShopMain {
         log.info("调用时间：{}s", invocationTime);
         doSomething();
         try {
+            //可以设置超时时间
             Double price = futurePrice.get();
             System.out.printf("price is %.2f%n", price);
         } catch (InterruptedException | ExecutionException e) {

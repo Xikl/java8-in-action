@@ -1,5 +1,7 @@
 package com.ximo.java8.chap11.future;
 
+import com.ximo.java8.chap11.Discount;
+
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
@@ -30,7 +32,17 @@ public class Shop {
         return calculatePrice(product);
     }
 
-
+    /**
+     * 格式化价格 按照商店名称 价格 折扣返回
+     *
+     * @param product 商品名称
+     * @return
+     */
+    public String getPrice2(String product) {
+        double price = calculatePrice(product);
+        Discount.Code code = Discount.Code.values()[random.nextInt(Discount.Code.values().length)];
+        return String.format("%s:%.2f:%s", name, price, code);
+    }
 
     /**
      * 计算价格
