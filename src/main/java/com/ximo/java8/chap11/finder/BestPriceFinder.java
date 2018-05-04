@@ -1,5 +1,7 @@
 package com.ximo.java8.chap11.finder;
 
+import com.ximo.java8.chap11.Discount;
+import com.ximo.java8.chap11.future.Quote;
 import com.ximo.java8.chap11.future.Shop;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 
@@ -122,5 +124,21 @@ public class BestPriceFinder {
         int threadCounts = Runtime.getRuntime().availableProcessors();
         System.out.println(threadCounts);
     }
+
+    /**
+     * 找到price
+     *
+     * @param product 商品
+     * @return 商店价格信息 列表
+     */
+    public List<String> findPrices2(String product) {
+        return SHOPS.stream()
+                .map(shop -> shop.getPrice2(product))
+                .map(Quote::parse)
+                .map(Discount::applyDiscount)
+                .collect(Collectors.toList());
+
+    }
+
 
 }

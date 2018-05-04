@@ -1,5 +1,7 @@
 package com.ximo.java8.chap11;
 
+import com.ximo.java8.chap11.future.Quote;
+
 import static com.ximo.java8.chap11.future.AsyncUtil.delay;
 import static com.ximo.java8.chap11.future.AsyncUtil.format;
 
@@ -21,8 +23,14 @@ public class Discount {
         }
     }
 
-    public static String applyDiscount() {
-        return null;
+    /**
+     * 打印商店折扣信息
+     *
+     * @param quote 商品折扣类
+     * @return 商店折扣信息
+     */
+    public static String applyDiscount(Quote quote) {
+        return quote.getShopName() + "price is" + Discount.apply(quote.getPrice(), quote.getDiscountCode());
     }
 
     /**
