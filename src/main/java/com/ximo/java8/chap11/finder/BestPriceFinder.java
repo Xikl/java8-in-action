@@ -127,6 +127,7 @@ public class BestPriceFinder {
 
     /**
      * 找到price
+     * 大概花费10秒左右
      *
      * @param product 商品
      * @return 商店价格信息 列表
