@@ -4,6 +4,7 @@ import com.ximo.java8.chap11.Discount;
 import com.ximo.java8.chap11.future.Quote;
 import com.ximo.java8.chap11.future.Shop;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
+import org.springframework.util.DigestUtils;
 
 import java.util.Arrays;
 import java.util.List;
@@ -100,6 +101,24 @@ public class BestPriceFinder {
     }
 
     /**
+     * 使用异步任务进行获得future
+     *
+     * @param product 商品
+     * @return 异步任务进行获得future
+     */
+    public List<String> findPriceByCompletedFutureMore(String product) {
+        List<CompletableFuture<String>> pricesFutures = SHOPS.stream()
+                .map(shop -> CompletableFuture.supplyAsync(() -> shop.getPrice2(product), priceExecutorService))
+                .map(future -> future.thenApply(Quote::parse))
+                .map(future -> future.thenCompose(quote ->
+                        CompletableFuture.supplyAsync(() -> Discount.applyDiscount(quote), priceExecutorService)))
+                .collect(Collectors.toList());
+        return pricesFutures.stream().map(CompletableFuture::join).collect(Collectors.toList());
+
+
+    }
+
+    /**
      * 并行操作
      * 大概花费1秒左右
      *
@@ -132,7 +151,7 @@ public class BestPriceFinder {
      * @param product 商品
      * @return 商店价格信息 列表
      */
-    public List<String> findPrices2(String product) {
+    public List<String> findPriceByQuoteClass(String product) {
         return SHOPS.stream()
                 .map(shop -> shop.getPrice2(product))
                 .map(Quote::parse)
@@ -140,6 +159,8 @@ public class BestPriceFinder {
                 .collect(Collectors.toList());
 
     }
+
+
 
 
 }
