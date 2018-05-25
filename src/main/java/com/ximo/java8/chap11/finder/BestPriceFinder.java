@@ -1,15 +1,18 @@
 package com.ximo.java8.chap11.finder;
 
 import com.ximo.java8.chap11.Discount;
+import com.ximo.java8.chap11.ExchangeService;
 import com.ximo.java8.chap11.future.Quote;
 import com.ximo.java8.chap11.future.Shop;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
-import org.springframework.util.DigestUtils;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.*;
-import java.util.stream.Collectors;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * @author 朱文赵
@@ -45,7 +48,7 @@ public class BestPriceFinder {
     public List<String> findPrices(String product) {
         return SHOPS.stream()
                 .map(shop -> format(shop, product))
-                .collect(Collectors.toList());
+                .collect(toList());
     }
 
     /**
@@ -71,12 +74,12 @@ public class BestPriceFinder {
                 .map(shop -> CompletableFuture.supplyAsync(() -> format(shop, product)))
                 //等待所有异步操作结束
 //                .map(CompletableFuture::join)
-                .collect(Collectors.toList());
+                .collect(toList());
 
         //为什么不用上一种返回呢 是因为如果两次map 那么将会变成同步 无法达到异步的过程
         return futures.stream()
                 .map(CompletableFuture::join)
-                .collect(Collectors.toList());
+                .collect(toList());
     }
 
     /**
@@ -92,12 +95,12 @@ public class BestPriceFinder {
                 .map(shop -> CompletableFuture.supplyAsync(() -> format(shop, product), priceExecutorService))
                 //等待所有异步操作结束
 //                .map(CompletableFuture::join)
-                .collect(Collectors.toList());
+                .collect(toList());
 
         //为什么不用上一种返回呢 是因为如果两次map 那么将会变成同步 无法达到异步的过程
         return futures.stream()
                 .map(CompletableFuture::join)
-                .collect(Collectors.toList());
+                .collect(toList());
     }
 
     /**
@@ -112,8 +115,8 @@ public class BestPriceFinder {
                 .map(future -> future.thenApply(Quote::parse))
                 .map(future -> future.thenCompose(quote ->
                         CompletableFuture.supplyAsync(() -> Discount.applyDiscount(quote), priceExecutorService)))
-                .collect(Collectors.toList());
-        return pricesFutures.stream().map(CompletableFuture::join).collect(Collectors.toList());
+                .collect(toList());
+        return pricesFutures.stream().map(CompletableFuture::join).collect(toList());
 
 
     }
@@ -128,7 +131,7 @@ public class BestPriceFinder {
     public List<String> findPricesByParallel(String product) {
         return SHOPS.parallelStream()
                 .map(shop -> format(shop, product))
-                .collect(Collectors.toList());
+                .collect(toList());
     }
 
 
@@ -156,11 +159,23 @@ public class BestPriceFinder {
                 .map(shop -> shop.getPrice2(product))
                 .map(Quote::parse)
                 .map(Discount::applyDiscount)
-                .collect(Collectors.toList());
+                .collect(toList());
 
     }
 
-
+    public List<String> findPricesInUSD(String product) {
+        List<CompletableFuture<String>> priceFutures = SHOPS
+                .stream()
+                .map(shop -> CompletableFuture.supplyAsync(() -> shop.getPrice(product))
+                        .thenCombine(CompletableFuture
+                                        .supplyAsync(() -> ExchangeService.getRate(ExchangeService.Money.EUR, ExchangeService.Money.USD)),
+                                (price, rate) -> price * rate)
+                        .thenApply(price -> shop.getName() + " price is " + price))
+                .collect(toList());
+        return priceFutures.stream()
+                .map(CompletableFuture::join)
+                .collect(toList());
+    }
 
 
 }
