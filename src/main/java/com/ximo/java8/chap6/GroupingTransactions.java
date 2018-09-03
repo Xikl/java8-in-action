@@ -41,14 +41,10 @@ public class GroupingTransactions {
             //获得该交易的货币种类
             Currency currency = transaction.getCurrency();
             //通过货币种类获得该交易类型list
-            List<Transaction> transactionsForCurrency = transactionsByCurrenciesMap.get(currency);
+            List<Transaction> transactionsForCurrency = transactionsByCurrenciesMap.computeIfAbsent(currency, k -> new ArrayList<>());
             //交易类型list为空
-            if (transactionsForCurrency == null) {
-                //新建一个ArrayList
-                transactionsForCurrency = new ArrayList<>();
-                //放入 交易Map中 键为 货币种类 值为该空的交易list
-                transactionsByCurrenciesMap.put(currency, transactionsForCurrency);
-            }
+            //新建一个ArrayList
+            //放入 交易Map中 键为 货币种类 值为该空的交易list
             //将这个交易类放入到该交易list中
             transactionsForCurrency.add(transaction);
         }
