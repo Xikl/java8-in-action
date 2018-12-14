@@ -42,8 +42,4 @@ public class ConvertUtil {
         }
     }
 
-    public void testLombok() {
-        Example.builder().age(18).build();
-
-    }
 }
