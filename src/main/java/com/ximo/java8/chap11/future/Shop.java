@@ -57,7 +57,7 @@ public class Shop {
 
     /**
      * 异步计算商品价格
-     *
+     * 等同于 CompletableFuture.supplyAsync(() -> calculatePrice(product));
      * @param product 商品
      * @return 商品价格
      */
