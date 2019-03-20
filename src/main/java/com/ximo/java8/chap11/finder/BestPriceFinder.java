@@ -8,10 +8,8 @@ import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.Optional;
+import java.util.concurrent.*;
 import java.util.function.BiFunction;
 
 import static java.util.stream.Collectors.toList;
@@ -192,5 +190,40 @@ public class BestPriceFinder {
                 .collect(toList());
     }
 
+    /**
+     * 利用java7 来进行合并 两个操作的值
+     *
+     * @param product 产品名称
+     * @return
+     */
+    public List<Optional<String>> findPricesByJava7MultiFuture(String product) {
+        BasicThreadFactory threadFactory =
+                new BasicThreadFactory.Builder().namingPattern("price-finder-%d").daemon(true).build();
+        // 创建工厂
+        ExecutorService executorService = Executors.newCachedThreadPool(threadFactory);
+
+        // 这里还是采用java8 Stream
+        List<Future<Double>> priceFutures = SHOPS.stream().map(shop -> {
+            Future<Double> futureRate = executorService.submit(() ->
+                    ExchangeService.getRate(ExchangeService.Money.EUR, ExchangeService.Money.USD));
+            Future<Double> futurePriceInUSD = executorService.submit(() -> {
+                double price = shop.getPrice(product);
+                return price * futureRate.get();
+            });
+            return futurePriceInUSD;
+        }).collect(toList());
+
+        List<Optional<String>> result = priceFutures.stream().map(price -> {
+            try {
+                String priceOpt = product + "price is " + price.get();
+                return Optional.of(priceOpt);
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+            }
+            return Optional.<String>empty();
+        }).collect(toList());
+
+        return result;
+    }
 
 }
