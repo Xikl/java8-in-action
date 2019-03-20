@@ -89,7 +89,7 @@ public class BestPriceFinder {
      * @param product
      * @return
      */
-    public List<String> findPriceByCompletedFutureFactory(String product) {
+    public List<String> findPriceByCompletedFutureAndExecutorService(String product) {
         List<CompletableFuture<String>> futures = SHOPS.stream()
                 //使用线程池
                 .map(shop -> CompletableFuture.supplyAsync(() -> format(shop, product), priceExecutorService))
