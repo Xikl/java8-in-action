@@ -15,13 +15,7 @@ public class FutureTest {
      */
     public void futureFirst() {
         ExecutorService executorService = Executors.newSingleThreadExecutor();
-        Future<Double> future = executorService.submit(new Callable<Double>() {
-            @Override
-            public Double call() throws Exception {
-                return doSomeLongComputation();
-            }
-
-        });
+        Future<Double> future = executorService.submit(FutureTest::doSomeLongComputation);
         try {
             //获取异步操作的结果，如果最终被阻塞，无法得到结果，那么在最多等待1秒钟之后退出
             future.get(1, TimeUnit.SECONDS);
