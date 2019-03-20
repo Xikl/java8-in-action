@@ -9,8 +9,10 @@ import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.function.BiFunction;
 
 import static java.util.stream.Collectors.toList;
 
@@ -104,24 +106,6 @@ public class BestPriceFinder {
     }
 
     /**
-     * 使用异步任务进行获得future
-     *
-     * @param product 商品
-     * @return 异步任务进行获得future
-     */
-    public List<String> findPriceByCompletedFutureMore(String product) {
-        List<CompletableFuture<String>> pricesFutures = SHOPS.stream()
-                .map(shop -> CompletableFuture.supplyAsync(() -> shop.getPrice2(product), priceExecutorService))
-                .map(future -> future.thenApply(Quote::parse))
-                .map(future -> future.thenCompose(quote ->
-                        CompletableFuture.supplyAsync(() -> Discount.applyDiscount(quote), priceExecutorService)))
-                .collect(toList());
-        return pricesFutures.stream().map(CompletableFuture::join).collect(toList());
-
-
-    }
-
-    /**
      * 并行操作
      * 大概花费1秒左右
      *
@@ -156,16 +140,47 @@ public class BestPriceFinder {
      */
     public List<String> findPriceByQuoteClass(String product) {
         return SHOPS.stream()
-                .map(shop -> shop.getPrice2(product))
+                .map(shop -> shop.getAndFormatPrice(product))
                 .map(Quote::parse)
                 .map(Discount::applyDiscount)
                 .collect(toList());
 
     }
 
+    /**
+     * 使用异步任务进行获得future
+     *
+     * 名称中不带 Async
+     * 的方法和它的前一个任务一样，在同一个线程中运行；而名称以 Async 结尾的方法会将后续的任
+     * 务提交到一个线程池，所以每个任务是由不同的线程处理的。
+     *
+     * @param product 商品
+     * @return 异步任务进行获得future
+     */
+    public List<String> findPriceByCompletedFutureMore(String product) {
+        List<CompletableFuture<String>> pricesFutures = SHOPS.stream()
+                .map(shop -> CompletableFuture.supplyAsync(() -> shop.getAndFormatPrice(product), priceExecutorService))
+                // 因为它没有io操作 是cpu密集 所以直接thenApply操作
+                .map(future -> future.thenApply(Quote::parse))
+                // applyDiscount 是比较耗时的操作 所以需要开启异步进行
+                // compose 将两个异步操作进行流水线操作 如 第一个操作完成时，将其结果作为参数传递给第二个操作。
+                .map(future -> future.thenCompose(quote ->
+                        CompletableFuture.supplyAsync(() -> Discount.applyDiscount(quote), priceExecutorService)))
+                .collect(toList());
+        return pricesFutures.stream().map(CompletableFuture::join).collect(toList());
+
+
+    }
+
+    /**
+     * 将两个异步操作合并 然后进行某些操作
+     * @see CompletableFuture#thenCombine(CompletionStage, BiFunction)
+     *
+     * @param product
+     * @return
+     */
     public List<String> findPricesInUSD(String product) {
-        List<CompletableFuture<String>> priceFutures = SHOPS
-                .stream()
+        List<CompletableFuture<String>> priceFutures = SHOPS.stream()
                 .map(shop -> CompletableFuture.supplyAsync(() -> shop.getPrice(product))
                         .thenCombine(CompletableFuture
                                         .supplyAsync(() -> ExchangeService.getRate(ExchangeService.Money.EUR, ExchangeService.Money.USD)),

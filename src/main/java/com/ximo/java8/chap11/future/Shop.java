@@ -16,7 +16,9 @@ public class Shop {
     private final String name;
     private final Random random;
 
-    /** 初始化 */
+    /**
+     * 初始化
+     */
     public Shop(String name) {
         this.name = name;
         this.random = new Random(name.charAt(0) * name.charAt(1) * name.charAt(2));
@@ -34,12 +36,14 @@ public class Shop {
 
     /**
      * 格式化价格 按照商店名称 价格 折扣返回
-     *
+     * 如：BestPrice:123.26:GOLD
+     * 非异步的
      * @param product 商品名称
-     * @return
+     * @return BestPrice:123.26:GOLD
      */
-    public String getPrice2(String product) {
+    public String getAndFormatPrice(String product) {
         double price = calculatePrice(product);
+        // discount 中的 随机一个code
         Discount.Code code = Discount.Code.values()[random.nextInt(Discount.Code.values().length)];
         return String.format("%s:%.2f:%s", name, price, code);
     }
@@ -58,6 +62,7 @@ public class Shop {
     /**
      * 异步计算商品价格
      * 等同于 CompletableFuture.supplyAsync(() -> calculatePrice(product));
+     *
      * @param product 商品
      * @return 商品价格
      */
