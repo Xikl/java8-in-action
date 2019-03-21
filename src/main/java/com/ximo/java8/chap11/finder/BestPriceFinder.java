@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.*;
 import java.util.function.BiFunction;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
@@ -156,19 +157,39 @@ public class BestPriceFinder {
      * @return 异步任务进行获得future
      */
     public List<String> findPriceByCompletedFutureMore(String product) {
-        List<CompletableFuture<String>> pricesFutures = SHOPS.stream()
-                .map(shop -> CompletableFuture.supplyAsync(() -> shop.getAndFormatPrice(product), priceExecutorService))
-                // 因为它没有io操作 是cpu密集 所以直接thenApply操作
-                .map(future -> future.thenApply(Quote::parse))
-                // applyDiscount 是比较耗时的操作 所以需要开启异步进行
-                // compose 将两个异步操作进行流水线操作 如 第一个操作完成时，将其结果作为参数传递给第二个操作。
-                .map(future -> future.thenCompose(quote ->
-                        CompletableFuture.supplyAsync(() -> Discount.applyDiscount(quote), priceExecutorService)))
-                .collect(toList());
+        List<CompletableFuture<String>> pricesFutures = findPriceStream(product).collect(toList());
         return pricesFutures.stream().map(CompletableFuture::join).collect(toList());
+    }
 
+    public void printPriceSteam(String product) {
+        long start = System.nanoTime();
+        final Stream<CompletableFuture<String>> priceStream = findPriceStream(product);
+        final CompletableFuture[] completableFutureArray = priceStream.map(printPriceFuture ->
+                // thenAccept表示 接受一个参数进行consumer操作 A -> ()
+                printPriceFuture.thenAccept(printPrice -> System.out.println(printPrice + " (done in " + ((System.nanoTime() - start) / 1_000_000) + " msecs)")))
+                .toArray(CompletableFuture[]::new);
+        // 等待所有的都执行完成 必须等待所有的
+        // 另一个静态方法 anyOf() 则只需要等待一个返回就行 就不在等待其他的信息
+        CompletableFuture.allOf(completableFutureArray).join();
+        System.out.println("All shops have now responded in " + ((System.nanoTime() - start) / 1_000_000) + " msecs");
+    }
+
+
+    /**
+     * 查找price 并且返回一个流 流的内容是CompletableFuture
+     *
+     * @param product 产品名称
+     * @return 返回一个流 里面的值为 一个答应价格的字符串信息 当然你也可以换成其他的类或者别的结构
+     */
+    private Stream<CompletableFuture<String>> findPriceStream(String product) {
+        return SHOPS.stream()
+                .map(shop -> CompletableFuture.supplyAsync(() -> shop.getAndFormatPrice(product), priceExecutorService))
+                .map(formatPriceFuture -> formatPriceFuture.thenApply(Quote::parse))
+                .map(quoteFuture -> quoteFuture.thenCompose( quote ->
+                        CompletableFuture.supplyAsync(() -> Discount.applyDiscount(quote), priceExecutorService)));
 
     }
+
 
     /**
      * 将两个异步操作合并 然后进行某些操作
