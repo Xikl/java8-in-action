@@ -190,6 +190,20 @@ public class BestPriceFinder {
 
     }
 
+    /**
+     * 和上面的部分进行对比 发现是一致的操作
+     *
+     * @param product
+     * @return
+     */
+    private Stream<CompletableFuture<String>> findPriceByChain(String product) {
+        return SHOPS.stream()
+                .map(shop -> CompletableFuture.supplyAsync(() -> shop.getAndFormatPrice(product), priceExecutorService)
+                        .thenApply(Quote::parse)
+                        .thenCompose(quote -> CompletableFuture.supplyAsync(() -> Discount.applyDiscount(quote), priceExecutorService))
+                );
+    }
+
 
     /**
      * 将两个异步操作合并 然后进行某些操作
