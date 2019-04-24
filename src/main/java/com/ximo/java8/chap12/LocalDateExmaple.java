@@ -1,8 +1,10 @@
 package com.ximo.java8.chap12;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.Month;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoField;
 
 /**
@@ -34,6 +36,10 @@ public class LocalDateExmaple {
     }
 
     public static void main(String[] args) {
+        // 稀奇古怪的时间格式
+        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        LocalDateTime localDateTime = LocalDateTime.parse("2019-04-22T13:28:17.093Z", df);
+        System.out.println(localDateTime);
     }
 
 }
