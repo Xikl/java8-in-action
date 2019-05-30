@@ -66,6 +66,12 @@ public class GroupingTransactions {
     }
 
 
+    // https://blog.csdn.net/mengxb12138/article/details/80893937
+    // https://blog.csdn.net/mengxb12138/article/details/80917221
+    public static void compute() {
+        // 学习上面的连接
+        // todo  添加自己的用例
+    }
 
 
 
