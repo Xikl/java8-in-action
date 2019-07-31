@@ -152,18 +152,24 @@ public class BestPriceFinder {
      * 名称中不带 Async
      * 的方法和它的前一个任务一样，在同一个线程中运行；而名称以 Async 结尾的方法会将后续的任
      * 务提交到一个线程池，所以每个任务是由不同的线程处理的。
+     * 很快 只需要两秒的操作
      *
      * @param product 商品
      * @return 异步任务进行获得future
      */
     public List<String> findPriceByCompletedFutureMore(String product) {
-        List<CompletableFuture<String>> pricesFutures = findPriceStream(product).collect(toList());
+        List<CompletableFuture<String>> pricesFutures = findPriceStreamByCompletableFuture(product).collect(toList());
         return pricesFutures.stream().map(CompletableFuture::join).collect(toList());
     }
 
+    /**
+     * allOf 需要等待all done
+     *
+     * @param product
+     */
     public void printPriceSteam(String product) {
         long start = System.nanoTime();
-        final Stream<CompletableFuture<String>> priceStream = findPriceStream(product);
+        final Stream<CompletableFuture<String>> priceStream = findPriceStreamByCompletableFuture(product);
         final CompletableFuture[] completableFutureArray = priceStream.map(printPriceFuture ->
                 // thenAccept表示 接受一个参数进行consumer操作 A -> ()
                 printPriceFuture.thenAccept(printPrice -> System.out.println(printPrice + " (done in " + ((System.nanoTime() - start) / 1_000_000) + " msecs)")))
@@ -181,7 +187,7 @@ public class BestPriceFinder {
      * @param product 产品名称
      * @return 返回一个流 里面的值为 一个答应价格的字符串信息 当然你也可以换成其他的类或者别的结构
      */
-    private Stream<CompletableFuture<String>> findPriceStream(String product) {
+    private Stream<CompletableFuture<String>> findPriceStreamByCompletableFuture(String product) {
         return SHOPS.stream()
                 .map(shop -> CompletableFuture.supplyAsync(() -> shop.getAndFormatPrice(product), priceExecutorService))
                 .map(formatPriceFuture -> formatPriceFuture.thenApply(Quote::parse))
