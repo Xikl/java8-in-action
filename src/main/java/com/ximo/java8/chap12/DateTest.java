@@ -27,8 +27,8 @@ public class DateTest {
         System.out.println(inputDate);
 
         // 每个月的第一个星期一日期
-        final LocalDate mondayOfFirstInMonth = LocalDate.now().with(TemporalAdjusters.firstInMonth(DayOfWeek.MONDAY));
-        System.out.println(mondayOfFirstInMonth);
+        final LocalDate firstMondayOfMonth = LocalDate.now().with(TemporalAdjusters.firstInMonth(DayOfWeek.MONDAY));
+        System.out.println(firstMondayOfMonth);
 
     }
 }
